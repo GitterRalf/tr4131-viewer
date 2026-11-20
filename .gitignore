@@ -1,0 +1,7 @@
+/.deps/
+/build/
+/build-*/
+/installer/
+/.codex-build/
+CMakeUserPresets.json
+*.user

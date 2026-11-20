@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/branding">
+        <file>logo_g.gif</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>theme.qss</file>
+        <file>theme-light.qss</file>
+        <file>spin-up.xpm</file>
+        <file>spin-up-inactive.xpm</file>
+        <file>spin-down.xpm</file>
+        <file>spin-down-inactive.xpm</file>
+        <file>checkmark.xpm</file>
+    </qresource>
+    <qresource prefix="/">
+        <file alias="device-icon.ico">tr4131-icon-a.ico</file>
+    </qresource>
+</RCC>

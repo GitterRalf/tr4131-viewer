@@ -1,0 +1,38 @@
+TR4131 Viewer - third-party notices
+================================
+
+The TR4131 Viewer application source and its animated OsciViewer logo are available under the MIT license (LICENSE).
+The following components retain their own notices and licensing terms.
+
+Qt 6.11.0
+---------
+The Windows installer includes the dynamically linked Qt runtime and plugins,
+including Qt Core, Gui, Widgets, Network, OpenGL, OpenGL Widgets, Serial Port and SVG. For this Qt build, see the
+upstream licensing information and the LGPLv3 and GPLv3 texts in licenses/:
+https://doc.qt.io/qt-6/licensing.html
+
+Matching upstream source for the Qt 6.11.0 runtime and plugins:
+https://download.qt.io/archive/qt/6.11/6.11.0/submodules/
+https://www.qt.io/development/open-source-lgpl-obligations
+
+To redistribute the installer, make the matching Qt source available in
+accordance with the LGPL and retain the applicable notices for Qt and its
+bundled components.
+
+GCC and MinGW-w64
+----------------
+libgcc and libstdc++ come from the GCC toolchain. See the GPLv3 and GCC Runtime
+Library Exception texts in licenses/. The MinGW-w64 winpthreads notices are in
+licenses/MinGW-w64-winpthreads.txt.
+
+Qwt 6.3.0
+---------
+The installer includes qwt.dll for the spectrum and spectrogram plots. Qwt is licensed under
+the Qwt License, Version 1.0. See licenses/Qwt-1.0.txt. The corresponding
+upstream source is available from https://sourceforge.net/projects/qwt/files/qwt/6.3.0/.
+
+NI-488.2
+--------
+The National Instruments driver is an external prerequisite for the GPIB
+connection. Obtain it from NI. An Elektor USB-GPIB adapter can use its own
+virtual COM-port driver instead.

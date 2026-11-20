@@ -1,0 +1,13 @@
+/* XPM */
+static const char *spin_arrow[] = {
+"11 7 2 1",
+". c None",
+"x c #F5FAFF",
+".x.......x.",
+"xx.......xx",
+".xx.....xx.",
+"..xx...xx..",
+"...xx.xx...",
+"....xxx....",
+".....x....."
+};
