@@ -5,7 +5,7 @@
 #include <QLabel>
 #include <QLocale>
 #include <QMatrix4x4>
-#include <QMouseEvent>
+#include "mouseposition.h"
 #include <QOpenGLBuffer>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
@@ -253,7 +253,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override
     {
         if (event->button() == Qt::LeftButton) {
-            lastMouse = event->position();
+            lastMouse = mousePosition(event);
             setCursor(Qt::ClosedHandCursor);
             event->accept();
         } else {
@@ -264,8 +264,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override
     {
         if (event->buttons() & Qt::LeftButton) {
-            const auto delta = event->position() - lastMouse;
-            lastMouse = event->position();
+            const auto position = mousePosition(event);
+            const auto delta = position - lastMouse;
+            lastMouse = position;
             azimuth = std::remainder(azimuth + float(delta.x() * 0.45), 360.0f);
             elevation = std::clamp(elevation + float(delta.y() * 0.35), 8.0f, 80.0f);
             update();
@@ -477,7 +478,7 @@ Spectrogram3DView::Spectrogram3DView(SpectrogramView &history, QWidget *parent)
     layout->addLayout(footer);
 
     connect(&history, &SpectrogramView::historyChanged, this, &Spectrogram3DView::updateHistory);
-    connect(depthEditor, &QSpinBox::valueChanged, &history, &SpectrogramView::setDepth);
+    connect(depthEditor, qOverload<int>(&QSpinBox::valueChanged), &history, &SpectrogramView::setDepth);
     connect(clearButton, &QPushButton::clicked, &history, &SpectrogramView::clearHistory);
     connect(resetButton, &QPushButton::clicked, this, [this] { canvas->resetCamera(); });
     retranslate();

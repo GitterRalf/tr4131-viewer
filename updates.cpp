@@ -15,6 +15,7 @@
 #include <QProcessEnvironment>
 #include <QPushButton>
 #include <QRegularExpression>
+#include <QSslSocket>
 #include <QStandardPaths>
 #include <QTimer>
 #include <QUrl>
@@ -55,6 +56,10 @@ void MainWindow::checkForUpdates()
     }
     updateCheckInProgress = true;
     updateAction->setEnabled(false);
+    if (!QSslSocket::supportsSsl()) {
+        checkPrivateRelease();
+        return;
+    }
     auto *network = new QNetworkAccessManager(this);
     QNetworkRequest request{QUrl(QStringLiteral("https://api.github.com/") + QLatin1String(releaseEndpoint))};
     request.setRawHeader("Accept", "application/vnd.github+json");
@@ -104,7 +109,7 @@ void MainWindow::checkPrivateRelease()
             finishUpdateCheck({}, tr("Die GitHub CLI konnte nicht gestartet werden."));
         }
     });
-    connect(process, &QProcess::finished, this, [this, process](int exitCode, QProcess::ExitStatus status) {
+    connect(process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, [this, process](int exitCode, QProcess::ExitStatus status) {
         const auto data = process->readAllStandardOutput();
         process->deleteLater();
         if (status == QProcess::NormalExit && exitCode == 0) {

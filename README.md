@@ -26,7 +26,14 @@ Alle Ansichten zeigen dieselben simulierten Sweeps.
 
 ## Installation unter Windows
 
-Das [GitHub-Release](https://github.com/GitterRalf/tr4131-viewer/releases/latest) enthält das Windows-x64-Setup mit Qt-, Qwt- und MinGW-Laufzeitdateien. Der Standardordner ist `C:\Programme\TR4131 Viewer`. Für den Download ist ein GitHub-Konto mit Zugriff auf das private Repository erforderlich. Je nach Adapter den 64-Bit-Treiber NI-488.2 oder den virtuellen COM-Port-Treiber separat installieren. Die 3D-Ansicht nutzt OpenGL.
+Das [GitHub-Release](https://github.com/GitterRalf/tr4131-viewer/releases/latest) bietet zwei Windows-Installer mit Qt-, Qwt- und MinGW-Laufzeitdateien. Für den Download ist ein GitHub-Konto mit Zugriff auf das private Repository erforderlich.
+
+| Setup | Qt-Kit | Standardordner |
+| --- | --- | --- |
+| x64 (64 Bit) | Qt 6.11.0 / MinGW 13.1 | Programme → TR4131 Viewer |
+| x86 (32 Bit) | Qt 5.15.19 / MinGW 8.1 | 32-Bit-Programme → TR4131 Viewer (32 Bit) |
+
+Die x86-Ausgabe läuft unter 32-Bit-Windows und kann unter x64-Windows parallel zur 64-Bit-Ausgabe installiert werden. Je nach Adapter den NI-488.2-Treiber mit Unterstützung für die Bitbreite der Anwendung oder den virtuellen COM-Port-Treiber separat installieren. Die 3D-Ansicht nutzt OpenGL.
 
 ## Starten
 
@@ -71,17 +78,25 @@ Unter **Einstellungen → Verbindung** werden Adapter, Bus oder COM-Port und GPI
 
 ## Bauen
 
-Benötigt werden Qt 6 mit Widgets, Concurrent, Network, SerialPort, LinguistTools und OpenGLWidgets, ein 64-Bit-Windows-Compiler und Qwt 6.3 als DLL mit Headern und Importbibliothek. Mit `-DTR4131_QT_COMMUNITY=OFF` lässt sich der Qt-Infodialog für einen kommerziellen Build ausblenden. Qwt muss für dasselbe Qt-Kit gebaut sein. CMake sucht Qwt standardmäßig unter `.deps/qwt`. Ein anderer Pfad ist über `-DQWT_ROOT=...` möglich.
+Das Buildskript benötigt CMake 3.24 oder neuer und Ninja. Die Qt-Kits brauchen Widgets, Concurrent, Network, SerialPort und LinguistTools. Der Qt-6-Build benötigt zusätzlich OpenGLWidgets. Qwt 6.3 muss jeweils mit dem passenden Qt-Kit gebaut werden. CMake erwartet die Header, die MinGW-Importbibliothek und die Qwt-DLL unter `.deps/qwt` für x64 und `.deps/qwt-qt5-x86` für x86. Bei direkter CMake-Konfiguration ist ein anderer Pfad über `-DQWT_ROOT=…` möglich. Mit `-DTR4131_QT_COMMUNITY=OFF` lässt sich der Qt-Infodialog für einen kommerziellen Build ausblenden.
 
-Mit dem auf diesem Rechner installierten Qt-MinGW-Kit im Projektordner:
+Mit den auf diesem Rechner installierten Qt-MinGW-Kits im Projektordner:
 
 ```powershell
-.\build.ps1
+.\build.ps1                    # x64, Bereitstellung in build-spectrogram
+.\build.ps1 -Architecture x86  # x86, Bereitstellung in build-x86
 ```
 
-Das Skript benötigt CMake 3.24 oder neuer und Ninja. Für den Umlaut in **Messgeräte** richtet es während des Builds einen vorübergehenden Laufwerksalias ein. Es legt die EXE und die Laufzeitbibliotheken in `build-spectrogram` ab.
+Die Schalter `-QtKit` und `-CompilerBin` erlauben alternative Installationspfade. Für den Umlaut in **Messgeräte** richtet das Skript während des Builds einen vorübergehenden Laufwerksalias ein. CMake kopiert Qwt neben die EXE. Das Buildskript ergänzt die Qt- und MinGW-Laufzeitdateien.
 
-CMake kopiert die Qwt-DLL neben die EXE. `windeployqt` ergänzt Qt-DLLs und das Windows-Plattform-Plug-in. NI-488.2 wird über den NI-Treiber auf dem Zielrechner bereitgestellt. Anschließend `TR4131-Viewer.iss` mit Inno Setup kompilieren. Es verwendet die Programmversion aus `version.h` und das Icon aus `assets/viewer.rc` und legt die Setupdatei unter `installer` ab.
+Anschließend aus dem Projektordner mit Inno Setup kompilieren:
+
+```powershell
+ISCC.exe TR4131-Viewer.iss
+ISCC.exe /DBuildArch=x86 TR4131-Viewer.iss
+```
+
+Die beiden Setupdateien liegen unter `installer`. Beide verwenden die Programmversion aus `version.h` und das Icon aus `assets/viewer.rc`.
 
 Die Gerätebefehle und Rückmeldungen beziehen sich auf die bereitgestellte Advantest-Bedienungsanleitung der Serie R4131, S. 8–12 und 29–33, sowie die gerätespezifischen Befehle des Java-OsciViewer.
 

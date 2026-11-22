@@ -18,7 +18,12 @@ int main(int argc, char *argv[])
     app.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
 
     QFont font = app.font();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    const QFontDatabase fontDatabase;
+    if (fontDatabase.hasFamily(QStringLiteral("Inter"))) {
+#else
     if (QFontDatabase::hasFamily(QStringLiteral("Inter"))) {
+#endif
         font.setFamily(QStringLiteral("Inter"));
     }
     font.setPointSize(10);

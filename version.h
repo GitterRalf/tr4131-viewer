@@ -1,3 +1,3 @@
 #pragma once
 
-#define TR4131_VIEWER_VERSION "2.0.0"
+#define TR4131_VIEWER_VERSION "2.0.1"

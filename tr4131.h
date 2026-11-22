@@ -12,7 +12,10 @@ struct GpibAddress
     int primary = 3;
     QString elektorPort;
 
-    bool operator==(const GpibAddress &) const = default;
+    bool operator==(const GpibAddress &other) const
+    {
+        return board == other.board && primary == other.primary && elektorPort == other.elektorPort;
+    }
 };
 
 struct DeviceMarker

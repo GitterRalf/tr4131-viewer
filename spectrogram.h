@@ -69,7 +69,11 @@ private:
         bool frequency;
         QString unit;
 
-        bool operator==(const Grid &) const = default;
+        bool operator==(const Grid &other) const
+        {
+            return address == other.address && start == other.start && stop == other.stop
+                && samples == other.samples && frequency == other.frequency && unit == other.unit;
+        }
     };
 
     void trimHistory();

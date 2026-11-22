@@ -20,7 +20,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QMouseEvent>
+#include "mouseposition.h"
 #include <QMovie>
 #include <QPainter>
 #include <QPalette>
@@ -332,7 +332,7 @@ void MainWindow::buildInterface()
         }
         updateControls();
     });
-    connect(refreshInterval, &QDoubleSpinBox::valueChanged, this, [this] {
+    connect(refreshInterval, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this] {
         refreshTimer.stop();
         updateControls();
     });
@@ -359,7 +359,7 @@ void MainWindow::createMenus()
     csvAction = file->addAction(tr("Daten als CSV speichern …"), this, &MainWindow::saveCsv);
     saveAction = file->addAction(tr("PNG speichern …"), this, &MainWindow::savePlot);
     file->addSeparator();
-    file->addAction(tr("&Beenden"), QKeySequence::Quit, this, &QWidget::close);
+    file->addAction(tr("&Beenden"), this, &QWidget::close)->setShortcut(QKeySequence::Quit);
 
     auto *settings = bar->addMenu(tr("&Einstellungen"));
     settings->setObjectName(QStringLiteral("settingsMenu"));
@@ -376,8 +376,8 @@ void MainWindow::createMenus()
         connect(action, &QAction::triggered, this, [this, dark] { setDarkTheme(dark); });
     }
     settings->addSeparator();
-    auto *save = settings->addAction(tr("Einstellungen speichern"), QKeySequence::Save,
-                                     this, &MainWindow::savePreferences);
+    auto *save = settings->addAction(tr("Einstellungen speichern"), this, &MainWindow::savePreferences);
+    save->setShortcut(QKeySequence::Save);
     save->setObjectName(QStringLiteral("saveSettings"));
 
     auto *right = new QMenuBar(bar);
@@ -585,11 +585,11 @@ QWidget *MainWindow::createSettingsPanel()
     };
     for (auto *box : options) {
         parameterInputs.append(box);
-        connect(box, &QComboBox::currentIndexChanged, this, &MainWindow::updateControls);
+        connect(box, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::updateControls);
     }
     for (auto *input : {centerInput, referenceInput}) {
         parameterInputs.append(input);
-        connect(input, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateControls);
+        connect(input, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &MainWindow::updateControls);
     }
     return group;
 }
@@ -995,7 +995,7 @@ void MainWindow::editConnection()
         interfaceLabel->setBuddy(index == 0 ? static_cast<QWidget *>(board) : port);
     };
     updateInterface(adapter->currentIndex());
-    connect(adapter, &QComboBox::currentIndexChanged, &dialog, updateInterface);
+    connect(adapter, qOverload<int>(&QComboBox::currentIndexChanged), &dialog, updateInterface);
 
     auto *address = new QSpinBox;
     address->setObjectName(QStringLiteral("gpibAddress"));
@@ -1014,7 +1014,7 @@ void MainWindow::editConnection()
         gpibBoard = board->value();
         gpibAddress = address->value();
         elektorPort = port->currentData().toString();
-        if (selectedAddress() != previous) {
+        if (!(selectedAddress() == previous)) {
             settingsCurrent = false;
             refreshRetryDelayMs = 0;
         }
@@ -1371,24 +1371,24 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         case QEvent::MouseButtonDblClick: {
             const auto *mouse = static_cast<QMouseEvent *>(event);
             if (mouse->button() == Qt::LeftButton && mouse->modifiers() == Qt::NoModifier) {
-                plotPress = mouse->position();
+                plotPress = mousePosition(mouse);
             }
             break;
         }
         case QEvent::MouseMove: {
             const auto *mouse = static_cast<QMouseEvent *>(event);
             if (mouse->buttons() & Qt::LeftButton) {
-                if (plotPress && isPlotDrag(*plotPress, mouse->position())) plotPress.reset();
-            } else if (cursorPosition && plot->canvas()->rect().contains(mouse->position().toPoint())) {
-                moveMeasurementCursor(mouse->position());
+                if (plotPress && isPlotDrag(*plotPress, mousePosition(mouse))) plotPress.reset();
+            } else if (cursorPosition && plot->canvas()->rect().contains(mousePosition(mouse).toPoint())) {
+                moveMeasurementCursor(mousePosition(mouse));
             }
             break;
         }
         case QEvent::MouseButtonRelease: {
             const auto *mouse = static_cast<QMouseEvent *>(event);
             if (mouse->button() != Qt::LeftButton) break;
-            const bool click = plotPress && !isPlotDrag(*plotPress, mouse->position())
-                && plot->canvas()->rect().contains(mouse->position().toPoint());
+            const bool click = plotPress && !isPlotDrag(*plotPress, mousePosition(mouse))
+                && plot->canvas()->rect().contains(mousePosition(mouse).toPoint());
             plotPress.reset();
             if (click && !lastSweep.write.isEmpty()) {
                 if (cursorPosition) {
@@ -1396,7 +1396,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
                     updateMeasurementCursor();
                     plot->replot();
                 } else {
-                    moveMeasurementCursor(mouse->position());
+                    moveMeasurementCursor(mousePosition(mouse));
                 }
             }
             break;
@@ -1495,7 +1495,11 @@ void MainWindow::saveCsv()
     QSaveFile file(dialog.selectedFiles().constFirst());
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        out.setCodec("UTF-8");
+#else
         out.setEncoding(QStringConverter::Utf8);
+#endif
         out.setGenerateByteOrderMark(true);
         QLocale csvLocale = locale();
         csvLocale.setNumberOptions(csvLocale.numberOptions() | QLocale::OmitGroupSeparator);

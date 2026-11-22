@@ -114,7 +114,7 @@ private:
 
         // Binary responses may be followed by CRLF from the USB firmware.
         // Keep the exact instrument payload, even when its last byte is a CR or LF.
-        if (binaryBytes && reply.size() > binaryBytes && reply.sliced(binaryBytes) == "\r\n") {
+        if (binaryBytes && reply.size() > binaryBytes && reply.mid(binaryBytes) == "\r\n") {
             reply.truncate(binaryBytes);
         }
         return reply;

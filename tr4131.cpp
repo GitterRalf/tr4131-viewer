@@ -222,7 +222,7 @@ double number(const QByteArray &bytes, const QString &label)
 
 QString levelUnit(const QByteArray &reply)
 {
-    const auto prefix = reply.first(2);
+    const auto prefix = reply.left(2);
     if (prefix == "DM" || prefix == "MM") return QStringLiteral("dBm");
     if (prefix == "DU" || prefix == "MU") return QStringLiteral("dBµV");
     if (prefix == "VM" || prefix == "VN" || prefix == "ME") return QStringLiteral("dBµV/m");
@@ -323,7 +323,7 @@ SweepResult operateTr4131(GpibAddress address, DeviceOperation operation,
         const auto level = instrument.query("OPRL");
         sweep.reference = number(level, QCoreApplication::translate("Tr4131", "Referenzpegel"));
         sweep.unit = levelUnit(level);
-        sweep.referenceCode = level.first(2);
+        sweep.referenceCode = level.left(2);
         if (sweep.scaleMode == 3 && sweep.reference <= 0) {
             fail(QCoreApplication::translate("Tr4131", "Das Gerät meldet einen ungültigen linearen Referenzpegel."));
         }

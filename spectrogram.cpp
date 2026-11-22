@@ -4,7 +4,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLocale>
-#include <QMouseEvent>
+#include "mouseposition.h"
 #include <QPalette>
 #include <QPen>
 #include <QPushButton>
@@ -98,7 +98,7 @@ SpectrogramView::SpectrogramView(int depth, QWidget *parent)
     cursorReadout->setMinimumHeight(cursorReadout->fontMetrics().height());
     layout->addWidget(cursorReadout);
     connect(clearButton, &QPushButton::clicked, this, &SpectrogramView::clearHistory);
-    connect(depthEditor, &QSpinBox::valueChanged, this, [this] {
+    connect(depthEditor, qOverload<int>(&QSpinBox::valueChanged), this, [this] {
         trimHistory();
         updateView();
     });
@@ -144,7 +144,7 @@ void SpectrogramView::addSweep(const Sweep &sweep, const GpibAddress &address)
     }
 
     const bool wasEmpty = history.empty();
-    if (grid != next) {
+    if (!(grid == next)) {
         history.clear();
         cursorPosition.reset();
         grid = next;
@@ -211,16 +211,16 @@ bool SpectrogramView::eventFilter(QObject *watched, QEvent *event)
         case QEvent::MouseButtonDblClick: {
             const auto *mouse = static_cast<QMouseEvent *>(event);
             if (mouse->button() == Qt::LeftButton && mouse->modifiers() == Qt::NoModifier) {
-                canvasPress = mouse->position();
+                canvasPress = mousePosition(mouse);
             }
             break;
         }
         case QEvent::MouseButtonRelease: {
             const auto *mouse = static_cast<QMouseEvent *>(event);
             if (mouse->button() != Qt::LeftButton) break;
-            const bool click = canvasPress && (mouse->position() - *canvasPress).manhattanLength()
+            const bool click = canvasPress && (mousePosition(mouse) - *canvasPress).manhattanLength()
                     < QApplication::startDragDistance()
-                && plot->canvas()->rect().contains(mouse->position().toPoint());
+                && plot->canvas()->rect().contains(mousePosition(mouse).toPoint());
             canvasPress.reset();
             if (click && hasHistory()) {
                 if (cursorPosition) {
@@ -228,7 +228,7 @@ bool SpectrogramView::eventFilter(QObject *watched, QEvent *event)
                     updateCursor();
                     plot->replot();
                 } else {
-                    moveCursor(mouse->position());
+                    moveCursor(mousePosition(mouse));
                 }
             }
             break;
@@ -236,8 +236,8 @@ bool SpectrogramView::eventFilter(QObject *watched, QEvent *event)
         case QEvent::MouseMove: {
             const auto *mouse = static_cast<QMouseEvent *>(event);
             if (cursorPosition && mouse->buttons() == Qt::NoButton
-                && plot->canvas()->rect().contains(mouse->position().toPoint())) {
-                moveCursor(mouse->position());
+                && plot->canvas()->rect().contains(mousePosition(mouse).toPoint())) {
+                moveCursor(mousePosition(mouse));
             }
             break;
         }
