@@ -2,6 +2,8 @@
 
 Qt-6-Widgets-Anwendung für den Advantest TR4131 unter Windows x64. Das Spektrum verwendet Qwt 6.3. Der TR4131 wird über NI-488.2 oder den Elektor-USB-GPIB-Adapter angesprochen.
 
+Der TR4131 Viewer ist eine Neuimplementierung der TR4131-Anbindung aus dem ursprünglichen Java-Projekt OsciViewer von Ralf Tralow. [OsciViewer auf SourceForge](https://sourceforge.net/projects/osziviewer/)
+
 ## Bildschirmaufnahmen
 
 Alle Ansichten zeigen dieselben simulierten Sweeps.
